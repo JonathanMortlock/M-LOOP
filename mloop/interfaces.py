@@ -170,13 +170,18 @@ class FileInterface(Interface):
                 time.sleep(mlu.filewrite_wait) #wait for file to be written to disk
                 try:
                     in_dict = mlu.get_dict_from_file(self.total_in_filename, self.in_file_type)
+                    
                 except IOError:
                     self.log.warning('Unable to open ' + self.total_in_filename + '. Trying again.')
                     continue
                 except (ValueError,SyntaxError):
                     self.log.error('There is something wrong with the syntax or type of your file:' + self.in_filename + '.' + self.in_file_type)
                     raise
-                os.remove(self.total_in_filename)
+                try:
+                    os.remove(self.total_in_filename)
+                except IOError:
+                    self.log.warning('Unable to delete output file, trying again')
+                    continue                
                 self.in_file_count += 1
                 self.log.debug('Putting dict from file onto in queue. Count:' + repr(self.in_file_count))
                 break
